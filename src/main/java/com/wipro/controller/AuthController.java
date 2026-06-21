@@ -47,11 +47,10 @@ public class AuthController {
     @PostMapping("/logout")
     @Operation(summary = "Logout user and blacklist token")
     public ResponseEntity<ApiResponse> logout() {
-
         authService.logout();
-
         return ResponseEntity.ok(new ApiResponse(true, "Logged out successfully"));
     }
+
 }
 
 
