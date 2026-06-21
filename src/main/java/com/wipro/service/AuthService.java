@@ -24,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
 
@@ -107,16 +109,18 @@ public class AuthService {
      * Logout
      */
     public void logout() {
-        String authHeader =
-                request.getHeader("Authorization");
+        String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return;
         }
 
         String token = authHeader.substring(7);
+        Date expiration = jwtService.extractExpiration(token);
 
-        BlacklistedToken blacklisted = BlacklistedToken.builder().token(token).expiryDate(LocalDateTime.now().plusDays(1)).build();
+        LocalDateTime expiry = expiration.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+        BlacklistedToken blacklisted = BlacklistedToken.builder().token(token).expiryDate(expiry).build();
 
         blacklistedTokenRepository.save(blacklisted);
     }
