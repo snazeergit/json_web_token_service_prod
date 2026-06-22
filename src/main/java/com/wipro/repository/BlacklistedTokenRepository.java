@@ -5,6 +5,5 @@ import com.wipro.entity.BlacklistedToken;
 
 public interface BlacklistedTokenRepository extends JpaRepository<BlacklistedToken, Long> {
 
-    boolean existsByToken(String token);
+  boolean existsByToken(String token);
 }
-

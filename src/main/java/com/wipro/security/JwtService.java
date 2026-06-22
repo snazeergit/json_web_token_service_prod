@@ -1,6 +1,5 @@
 package com.wipro.security;
 
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -16,48 +15,54 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    @Value("${jwt.secret}")
-    private String secret;
+  @Value("${jwt.secret}")
+  private String secret;
 
-    @Value("${jwt.access-token-expiry}")
-    private long accessExpiry;
+  @Value("${jwt.access-token-expiry}")
+  private long accessExpiry;
 
-    private SecretKey getSigningKey() {
+  private SecretKey getSigningKey() {
 
-        return Keys.hmacShaKeyFor(secret.getBytes());
-    }
+    return Keys.hmacShaKeyFor(secret.getBytes());
+  }
 
-    public String generateAccessToken(UserDetails userDetails) {
+  public String generateAccessToken(UserDetails userDetails) {
 
-        return Jwts.builder().subject(userDetails.getUsername()).issuedAt(new Date()).expiration(new Date(System.currentTimeMillis() + accessExpiry)).signWith(getSigningKey()).compact();
-    }
+    return Jwts.builder()
+        .subject(userDetails.getUsername())
+        .issuedAt(new Date())
+        .expiration(new Date(System.currentTimeMillis() + accessExpiry))
+        .signWith(getSigningKey())
+        .compact();
+  }
 
-    public String extractUsername(String token) {
+  public String extractUsername(String token) {
 
-        return extractClaim(token, Claims::getSubject);
-    }
+    return extractClaim(token, Claims::getSubject);
+  }
 
-    public <T> T extractClaim(String token, Function<Claims, T> resolver) {
+  public <T> T extractClaim(String token, Function<Claims, T> resolver) {
 
-        Claims claims = Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(token).getPayload();
+    Claims claims =
+        Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(token).getPayload();
 
-        return resolver.apply(claims);
-    }
+    return resolver.apply(claims);
+  }
 
-    public boolean isTokenValid(String token, UserDetails userDetails) {
+  public boolean isTokenValid(String token, UserDetails userDetails) {
 
-        String username = extractUsername(token);
+    String username = extractUsername(token);
 
-        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
-    }
+    return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+  }
 
-    private boolean isTokenExpired(String token) {
+  private boolean isTokenExpired(String token) {
 
-        return extractClaim(token, Claims::getExpiration).before(new Date());
-    }
+    return extractClaim(token, Claims::getExpiration).before(new Date());
+  }
 
-    public Date extractExpiration(String token) {
+  public Date extractExpiration(String token) {
 
-        return extractClaim(token, Claims::getExpiration);
-    }
+    return extractClaim(token, Claims::getExpiration);
+  }
 }

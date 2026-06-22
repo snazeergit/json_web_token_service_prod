@@ -16,43 +16,44 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@Tag(name = "Authentication APIs", description = "User Registration, Login, Refresh Token and Logout")
+@Tag(
+    name = "Authentication APIs",
+    description = "User Registration, Login, Refresh Token and Logout")
 public class AuthController {
 
-    private final AuthService authService;
+  private final AuthService authService;
 
-    @PostMapping("/register")
-    @Operation(summary = "Register a new user")
-    public ResponseEntity<ApiResponse> register(@Valid @RequestBody RegisterRequest request) {
+  @PostMapping("/register")
+  @Operation(summary = "Register a new user")
+  public ResponseEntity<ApiResponse> register(@Valid @RequestBody RegisterRequest request) {
 
-        authService.register(request);
+    authService.register(request);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse(true, "User registered successfully"));
-    }
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(new ApiResponse(true, "User registered successfully"));
+  }
 
-    @PostMapping("/login")
-    @Operation(summary = "Authenticate user and generate JWT tokens")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+  @PostMapping("/login")
+  @Operation(summary = "Authenticate user and generate JWT tokens")
+  public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
 
-        return ResponseEntity.ok(authService.login(request));
-    }
+    return ResponseEntity.ok(authService.login(request));
+  }
 
-    @PostMapping("/refresh")
-    @Operation(summary = "Generate new access token using refresh token")
-    public ResponseEntity<AuthResponse> refreshToken(@RequestBody RefreshTokenRequest request) {
+  @PostMapping("/refresh")
+  @Operation(summary = "Generate new access token using refresh token")
+  public ResponseEntity<AuthResponse> refreshToken(@RequestBody RefreshTokenRequest request) {
 
-        return ResponseEntity.ok(authService.refreshToken(request));
-    }
+    return ResponseEntity.ok(authService.refreshToken(request));
+  }
 
-    @PostMapping("/logout")
-    @Operation(summary = "Logout user and blacklist token")
-    public ResponseEntity<ApiResponse> logout() {
-        authService.logout();
-        return ResponseEntity.ok(new ApiResponse(true, "Logged out successfully"));
-    }
-
+  @PostMapping("/logout")
+  @Operation(summary = "Logout user and blacklist token")
+  public ResponseEntity<ApiResponse> logout() {
+    authService.logout();
+    return ResponseEntity.ok(new ApiResponse(true, "Logged out successfully"));
+  }
 }
-
 
 /*
 Register:
@@ -95,4 +96,3 @@ Logout:
 POST /api/auth/logout
 Authorization: Bearer eyJ...
  */
-

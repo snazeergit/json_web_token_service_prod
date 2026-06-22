@@ -1,4 +1,3 @@
 package com.wipro.service;
 
-public class UserService {
-}
+public class UserService {}

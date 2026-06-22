@@ -10,29 +10,33 @@ import org.springframework.stereotype.Component;
 @Component
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
-    @Override
-    public void commence(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            AuthenticationException authException)
-            throws IOException, java.io.IOException {
+  @Override
+  public void commence(
+      HttpServletRequest request,
+      HttpServletResponse response,
+      AuthenticationException authException)
+      throws IOException, java.io.IOException {
 
-        String errorCode = (String) request.getAttribute("jwt_error");
+    String errorCode = (String) request.getAttribute("jwt_error");
 
-        if (errorCode == null) {
-            errorCode = "AUTHENTICATION_FAILED";
-        }
+    if (errorCode == null) {
+      errorCode = "AUTHENTICATION_FAILED";
+    }
 
-        String message = switch (errorCode) {
-            case "ACCESS_TOKEN_EXPIRED" -> "Access token expired";
-            case "INVALID_ACCESS_TOKEN" -> "Invalid access token";
-            default -> "Authentication required";
+    String message =
+        switch (errorCode) {
+          case "ACCESS_TOKEN_EXPIRED" -> "Access token expired";
+          case "INVALID_ACCESS_TOKEN" -> "Invalid access token";
+          default -> "Authentication required";
         };
 
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType("application/json");
+    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+    response.setContentType("application/json");
 
-        response.getWriter().write("""
+    response
+        .getWriter()
+        .write(
+            """
         {
           "timestamp": "%s",
           "status": 401,
@@ -41,11 +45,8 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
           "message": "%s",
           "path": "%s"
         }
-        """.formatted(
-                java.time.LocalDateTime.now(),
-                errorCode,
-                message,
-                request.getRequestURI()
-        ));
-    }
+        """
+                .formatted(
+                    java.time.LocalDateTime.now(), errorCode, message, request.getRequestURI()));
+  }
 }

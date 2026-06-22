@@ -14,25 +14,22 @@ import java.util.Set;
 @Builder
 public class User {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    private String username;
+  private String username;
 
-    private String email;
+  private String email;
 
-    private String password;
+  private String password;
 
-    private boolean enabled;
+  private boolean enabled;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "user_roles",
-            joinColumns =
-            @JoinColumn(name = "user_id"),
-            inverseJoinColumns =
-            @JoinColumn(name = "role_id")
-    )
-    private Set<Role> roles;
+  @ManyToMany(fetch = FetchType.EAGER)
+  @JoinTable(
+      name = "user_roles",
+      joinColumns = @JoinColumn(name = "user_id"),
+      inverseJoinColumns = @JoinColumn(name = "role_id"))
+  private Set<Role> roles;
 }

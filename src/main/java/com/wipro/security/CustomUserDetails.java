@@ -10,33 +10,32 @@ import java.util.stream.Collectors;
 
 public class CustomUserDetails implements UserDetails {
 
-    private final User user;
+  private final User user;
 
-    public CustomUserDetails(User user) {
-        this.user = user;
-    }
+  public CustomUserDetails(User user) {
+    this.user = user;
+  }
 
-    @Override
-    public Collection<SimpleGrantedAuthority> getAuthorities() {
+  @Override
+  public Collection<SimpleGrantedAuthority> getAuthorities() {
 
-        return user.getRoles()
-                .stream()
-                .map(Role::getName)
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toSet());
-    }
+    return user.getRoles().stream()
+        .map(Role::getName)
+        .map(SimpleGrantedAuthority::new)
+        .collect(Collectors.toSet());
+  }
 
-    @Override
-    public String getPassword() {
-        return user.getPassword();
-    }
+  @Override
+  public String getPassword() {
+    return user.getPassword();
+  }
 
-    @Override
-    public String getUsername() {
-        return user.getUsername();
-    }
+  @Override
+  public String getUsername() {
+    return user.getUsername();
+  }
 
-    public User getUser() {
-        return user;
-    }
+  public User getUser() {
+    return user;
+  }
 }

@@ -18,51 +18,53 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private final JwtService jwtService;
-    private final CustomUserDetailsService userDetailsService;
+  private final JwtService jwtService;
+  private final CustomUserDetailsService userDetailsService;
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+  @Override
+  protected void doFilterInternal(
+      HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+      throws ServletException, IOException {
 
-        String authHeader = request.getHeader("Authorization");
+    String authHeader = request.getHeader("Authorization");
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        try {
-
-            String jwt = authHeader.substring(7);
-
-            String username = jwtService.extractUsername(jwt);
-
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-                if (jwtService.isTokenValid(jwt, userDetails)) {
-
-                    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-
-                    auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                    SecurityContextHolder.getContext().setAuthentication(auth);
-                }
-            }
-
-        } catch (io.jsonwebtoken.ExpiredJwtException ex) {
-
-            request.setAttribute("jwt_error", "ACCESS_TOKEN_EXPIRED");
-            throw ex;
-
-        } catch (io.jsonwebtoken.MalformedJwtException | io.jsonwebtoken.security.SignatureException |
-                 IllegalArgumentException ex) {
-
-            request.setAttribute("jwt_error", "INVALID_ACCESS_TOKEN");
-            throw ex;
-        }
-
-        filterChain.doFilter(request, response);
+    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+      filterChain.doFilter(request, response);
+      return;
     }
+
+    try {
+
+      String jwt = authHeader.substring(7);
+
+      String username = jwtService.extractUsername(jwt);
+
+      if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+        if (jwtService.isTokenValid(jwt, userDetails)) {
+          UsernamePasswordAuthenticationToken auth =
+              new UsernamePasswordAuthenticationToken(
+                  userDetails, null, userDetails.getAuthorities());
+          auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+          SecurityContextHolder.getContext().setAuthentication(auth);
+        }
+      }
+
+    } catch (io.jsonwebtoken.ExpiredJwtException ex) {
+
+      request.setAttribute("jwt_error", "ACCESS_TOKEN_EXPIRED");
+      throw ex;
+
+    } catch (io.jsonwebtoken.MalformedJwtException
+        | io.jsonwebtoken.security.SignatureException
+        | IllegalArgumentException ex) {
+
+      request.setAttribute("jwt_error", "INVALID_ACCESS_TOKEN");
+      throw ex;
+    }
+
+    filterChain.doFilter(request, response);
+  }
 }
