@@ -2,13 +2,11 @@ package com.wipro.controller;
 
 import com.wipro.dto.*;
 import com.wipro.service.AuthService;
+import com.wipro.service.RefreshTokenService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
 import jakarta.validation.Valid;
-
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
   private final AuthService authService;
+  private final RefreshTokenService refreshTokenService;
 
   @PostMapping("/register")
   @Operation(summary = "Register a new user")
@@ -44,7 +43,7 @@ public class AuthController {
   @Operation(summary = "Generate new access token using refresh token")
   public ResponseEntity<AuthResponse> refreshToken(@RequestBody RefreshTokenRequest request) {
 
-    return ResponseEntity.ok(authService.refreshToken(request));
+    return ResponseEntity.ok(refreshTokenService.refreshToken(request));
   }
 
   @PostMapping("/logout")
