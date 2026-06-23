@@ -135,4 +135,17 @@ public class GlobalExceptionHandler {
                         request.getRequestURI());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
+
+    @ExceptionHandler(RefreshTokenReuseDetectedException.class)
+    public ResponseEntity<ErrorResponse> handleRefreshTokenReuseDetectedException(RefreshTokenReuseDetectedException ex, HttpServletRequest request){
+        ErrorResponse errorResponse =
+                new ErrorResponse(
+                        LocalDateTime.now(),
+                        401,
+                        "Unauthorized",
+                        "REFRESH TOKEN REUSE DETECTED",
+                        ex.getMessage(),
+                        request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+    }
 }
