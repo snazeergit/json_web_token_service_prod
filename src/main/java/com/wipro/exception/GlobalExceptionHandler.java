@@ -137,7 +137,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(RefreshTokenReuseDetectedException.class)
-    public ResponseEntity<ErrorResponse> handleRefreshTokenReuseDetectedException(RefreshTokenReuseDetectedException ex, HttpServletRequest request){
+    public ResponseEntity<ErrorResponse> handleRefreshTokenReuseDetectedException(RefreshTokenReuseDetectedException ex, HttpServletRequest request) {
         ErrorResponse errorResponse =
                 new ErrorResponse(
                         LocalDateTime.now(),

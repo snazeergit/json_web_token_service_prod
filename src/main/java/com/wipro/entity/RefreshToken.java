@@ -16,17 +16,17 @@ import java.time.LocalDateTime;
 @Table(name = "refresh_tokens")
 public class RefreshToken {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  private String token;
+    private String token;
 
-  private LocalDateTime expiryDate;
+    private LocalDateTime expiryDate;
 
-  private boolean revoked;
+    private boolean revoked;
 
-  @ManyToOne
-  @JoinColumn(name = "user_id")
-  private User user;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 }

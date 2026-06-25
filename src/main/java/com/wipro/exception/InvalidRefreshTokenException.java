@@ -2,9 +2,11 @@ package com.wipro.exception;
 
 public class InvalidRefreshTokenException extends RuntimeException {
 
-  public InvalidRefreshTokenException() {}
+    public InvalidRefreshTokenException() {
+        super();
+    }
 
-  public InvalidRefreshTokenException(String message) {
-    super(message);
-  }
+    public InvalidRefreshTokenException(String message) {
+        super(message);
+    }
 }

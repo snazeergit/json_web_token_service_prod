@@ -14,11 +14,11 @@ import java.time.LocalDateTime;
 @Builder
 public class BlacklistedToken {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  private String token;
+    private String token;
 
-  private LocalDateTime expiryDate;
+    private LocalDateTime expiryDate;
 }

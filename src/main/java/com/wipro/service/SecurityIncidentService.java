@@ -14,6 +14,6 @@ public class SecurityIncidentService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public int revokeAllSessions(Long userId) {
-       return refreshTokenRepository.revokeAllByUserId(userId);
+        return refreshTokenRepository.revokeAllByUserId(userId);
     }
 }

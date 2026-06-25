@@ -9,10 +9,10 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class BlacklistedTokenCleanupScheduler {
 
-  private final BlacklistedTokenService service;
+    private final BlacklistedTokenService service;
 
-  @Scheduled(cron = "0 */1 * * * *")
-  public void cleanup() {
-    service.cleanupExpiredTokens();
-  }
+    @Scheduled(cron = "0 */15 * * * *")
+    public void cleanup() {
+        service.cleanupExpiredTokens();
+    }
 }

@@ -1,13 +1,13 @@
 package com.wipro.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import com.wipro.entity.BlacklistedToken;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
 
 public interface BlacklistedTokenRepository extends JpaRepository<BlacklistedToken, Long> {
 
-  boolean existsByToken(String token);
+    boolean existsByToken(String token);
 
-  void deleteByExpiryDateBefore(LocalDateTime now);
+    void deleteByExpiryDateBefore(LocalDateTime now);
 }
