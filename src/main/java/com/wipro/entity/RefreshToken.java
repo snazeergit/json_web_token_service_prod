@@ -17,13 +17,14 @@ import java.time.LocalDateTime;
 public class RefreshToken {
 
     @Id
-    @GeneratedValue(strategy =
-            GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String token;
 
     private LocalDateTime expiryDate;
+
+    private boolean revoked;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

@@ -19,8 +19,7 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public Collection<SimpleGrantedAuthority> getAuthorities() {
 
-        return user.getRoles()
-                .stream()
+        return user.getRoles().stream()
                 .map(Role::getName)
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toSet());
@@ -34,5 +33,9 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public String getUsername() {
         return user.getUsername();
+    }
+
+    public User getUser() {
+        return user;
     }
 }
