@@ -34,13 +34,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         try {
-
             String jwt = authHeader.substring(7);
-
             String username = jwtService.extractUsername(jwt);
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
                 if (jwtService.isTokenValid(jwt, userDetails)) {
@@ -51,20 +48,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
             }
-
         } catch (io.jsonwebtoken.ExpiredJwtException ex) {
-
             request.setAttribute("jwt_error", "ACCESS_TOKEN_EXPIRED");
             throw ex;
-
         } catch (io.jsonwebtoken.MalformedJwtException
                  | io.jsonwebtoken.security.SignatureException
                  | IllegalArgumentException ex) {
-
             request.setAttribute("jwt_error", "INVALID_ACCESS_TOKEN");
             throw ex;
         }
-
         filterChain.doFilter(request, response);
     }
 }
