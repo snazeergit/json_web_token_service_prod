@@ -44,9 +44,9 @@ public class AuthController {
 
     @PostMapping("/refresh")
     @Operation(summary = "Generate new access token using refresh token")
-    public ResponseEntity<AuthResponse> refreshToken(@RequestBody RefreshTokenRequest request) {
+    public ResponseEntity<AuthResponse> refreshAccessToken(@RequestBody RefreshTokenRequest request) {
 
-        return ResponseEntity.ok(refreshTokenService.refreshToken(request));
+        return ResponseEntity.ok(refreshTokenService.refreshAccessToken(request));
     }
 
     @PostMapping("/logout")
@@ -55,6 +55,7 @@ public class AuthController {
         authService.logout();
         return ResponseEntity.ok(new ApiResponse(true, "Logged out successfully"));
     }
+
 }
 
 /*

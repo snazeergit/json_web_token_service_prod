@@ -48,11 +48,12 @@ public class RefreshTokenService {
     }
 
     /**
-     * Refresh Token
+     * Refresh Access Token
      */
     @Transactional
-    public AuthResponse refreshToken(RefreshTokenRequest request) {
+    public AuthResponse refreshAccessToken(RefreshTokenRequest request) {
 
+        // Validating input refresh token
         RefreshToken existingRefreshToken =
                 refreshTokenRepository
                         .findByToken(request.getRefreshToken())
@@ -65,6 +66,7 @@ public class RefreshTokenService {
         if (existingRefreshToken.isRevoked()) {
 
             log.info("Revoking all refresh tokens for user {}", user.getUsername());
+            //updating the revoked status of all refresh tokens for the user in a new transaction
             int revoked = securityIncidentService.revokeAllSessions(user.getId());
             log.info("Revoked {} refresh tokens", revoked);
 
@@ -72,14 +74,14 @@ public class RefreshTokenService {
                     "Refresh token reuse detected. All sessions revoked.");
         }
 
+        // Deleting existing refresh token if expired
         if (existingRefreshToken.getExpiryDate().isBefore(LocalDateTime.now())) {
-
             refreshTokenRepository.delete(existingRefreshToken);
-
             throw new RefreshTokenExpiredException(
                     "Refresh token expired");
         }
 
+        // Generating new access token
         String newAccessToken =
                 jwtService.generateAccessToken(
                         new org.springframework.security.core.userdetails.User(
@@ -87,12 +89,8 @@ public class RefreshTokenService {
                                 user.getPassword(),
                                 Collections.emptyList()));
 
+        // Generate new refresh token with revoke status false and save it to the database
         String newRefreshTokenValue = createRefreshToken(user);
-
-        // Revoke old refresh token instead of deleting it
-        existingRefreshToken.setRevoked(true);
-        refreshTokenRepository.save(existingRefreshToken);
-
         RefreshToken newRefreshToken =
                 RefreshToken.builder()
                         .token(newRefreshTokenValue)
@@ -103,6 +101,9 @@ public class RefreshTokenService {
 
         refreshTokenRepository.save(newRefreshToken);
 
+        // Revoke old refresh token instead of deleting it
+        existingRefreshToken.setRevoked(true);
+        refreshTokenRepository.save(existingRefreshToken);
         return AuthResponse.builder()
                 .accessToken(newAccessToken)
                 .refreshToken(newRefreshTokenValue)
