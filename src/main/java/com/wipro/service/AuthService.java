@@ -7,6 +7,7 @@ import com.wipro.entity.BlacklistedToken;
 import com.wipro.entity.Role;
 import com.wipro.entity.User;
 import com.wipro.exception.*;
+import com.wipro.exception.AuthenticationCredentialsNotFoundException;
 import com.wipro.repository.BlacklistedTokenRepository;
 import com.wipro.repository.RefreshTokenRepository;
 import com.wipro.repository.RoleRepository;
@@ -17,9 +18,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -84,6 +83,10 @@ public class AuthService {
                     authenticationManager.authenticate(
                             new UsernamePasswordAuthenticationToken(
                                     request.getUsername(), request.getPassword()));
+        } catch (DisabledException ex) {
+            throw new DisabledException("User is disabled");
+        } catch (LockedException ex) {
+            throw new LockedException("User has been locked");
         } catch (BadCredentialsException ex) {
             throw new InvalidCredentialsException("Invalid username or password");
         }
@@ -108,20 +111,20 @@ public class AuthService {
             throw new AuthenticationCredentialsNotFoundException(
                     "Authorization token is missing or invalid");
         }
-        String token = authHeader.substring(7).trim();
-        if (token.isEmpty()) {
+        String accessToken = authHeader.substring(7).trim();
+        if (accessToken.isEmpty()) {
             throw new AuthenticationCredentialsNotFoundException(
                     "Authorization token is missing or invalid");
         }
 
         try {
-            String username = jwtService.extractUsername(token);
+            String username = jwtService.extractUsername(accessToken);
 
             // Delete refresh token
             refreshTokenService.deleteRefreshTokenByUsername(username);
 
             // Check if access token is already blacklisted
-            blacklistToken(token);
+            blacklistToken(accessToken);
 
         } catch (io.jsonwebtoken.ExpiredJwtException ex) {
             String username = ex.getClaims().getSubject();
