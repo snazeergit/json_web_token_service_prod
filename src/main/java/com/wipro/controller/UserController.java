@@ -5,6 +5,7 @@ import com.wipro.entity.User;
 import com.wipro.mapper.UserMapper;
 import com.wipro.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/users")
+@Tag(
+        name = "User Operations APIs",
+        description = "Fetching and deleting existing user(s).")
 public class UserController {
 
     @Autowired
@@ -43,5 +47,11 @@ public class UserController {
     public ResponseEntity<String> deleteUserById(@PathVariable Long userId) {
         userService.deleteUserById(userId);
         return new ResponseEntity<>("User deleted successfully", HttpStatus.OK);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<String> disableUserById(@PathVariable Long id) {
+        String res = userService.disableUserById(id);
+        return new ResponseEntity<>(res, HttpStatus.OK);
     }
 }

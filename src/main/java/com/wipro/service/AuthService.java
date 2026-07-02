@@ -35,7 +35,6 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
     private final BlacklistedTokenRepository blacklistedTokenRepository;
 
     private final PasswordEncoder passwordEncoder;
@@ -44,9 +43,6 @@ public class AuthService {
 
     private final HttpServletRequest request;
     private final RefreshTokenService refreshTokenService;
-
-    @Value("${jwt.refresh-token-expiry}")
-    private long refreshTokenExpiry;
 
     /**
      * Register User
@@ -84,7 +80,7 @@ public class AuthService {
                             new UsernamePasswordAuthenticationToken(
                                     request.getUsername(), request.getPassword()));
         } catch (DisabledException ex) {
-            throw new DisabledException("User is disabled");
+            throw new UserDisabledException("User is disabled");
         } catch (LockedException ex) {
             throw new LockedException("User has been locked");
         } catch (BadCredentialsException ex) {
