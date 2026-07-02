@@ -14,7 +14,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UsernameAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleUsernameAlreadyExistsException(
-            UsernameAlreadyExistsException ex) {
+            UsernameAlreadyExistsException ex, HttpServletRequest request) {
         ErrorResponse errorResponse =
                 new ErrorResponse(
                         LocalDateTime.now(),
@@ -22,13 +22,14 @@ public class GlobalExceptionHandler {
                         "Bad Request",
                         "USERNAME_ALREADY_EXISTS",
                         ex.getMessage(),
-                        "/api/auth/register");
+                        request.getRequestURI()
+                );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleEmailAlreadyExistsException(
-            EmailAlreadyExistsException ex) {
+            EmailAlreadyExistsException ex, HttpServletRequest request) {
         ErrorResponse errorResponse =
                 new ErrorResponse(
                         LocalDateTime.now(),
@@ -36,13 +37,14 @@ public class GlobalExceptionHandler {
                         "Bad Request",
                         "EMAIL_ALREADY_EXISTS",
                         ex.getMessage(),
-                        "/api/auth/register");
+                        request.getRequestURI()
+                );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
     @ExceptionHandler(UserRoleNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleUserRoleNotFoundException(
-            UserRoleNotFoundException ex) {
+            UserRoleNotFoundException ex, HttpServletRequest request) {
         ErrorResponse errorResponse =
                 new ErrorResponse(
                         LocalDateTime.now(),
@@ -50,12 +52,13 @@ public class GlobalExceptionHandler {
                         "Bad Request",
                         "USER_ROLE_NOT_FOUND",
                         ex.getMessage(),
-                        "/api/auth/register");
+                        request.getRequestURI()
+                );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleUserNotFoundException(UserNotFoundException ex) {
+    public ResponseEntity<ErrorResponse> handleUserNotFoundException(UserNotFoundException ex, HttpServletRequest request) {
         ErrorResponse errorResponse =
                 new ErrorResponse(
                         LocalDateTime.now(),
@@ -63,13 +66,14 @@ public class GlobalExceptionHandler {
                         "Not Found",
                         "USER_NOT_FOUND",
                         ex.getMessage(),
-                        "/api/auth/login");
+                        request.getRequestURI()
+                );
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 
     @ExceptionHandler(RefreshTokenExpiredException.class)
     public ResponseEntity<ErrorResponse> handleRefreshTokenExpiredException(
-            RefreshTokenExpiredException ex) {
+            RefreshTokenExpiredException ex, HttpServletRequest request) {
         ErrorResponse errorResponse =
                 new ErrorResponse(
                         LocalDateTime.now(),
@@ -77,13 +81,14 @@ public class GlobalExceptionHandler {
                         "Bad Request",
                         "REFRESH_TOKEN_EXPIRED",
                         ex.getMessage(),
-                        "/api/auth/refresh");
+                        request.getRequestURI()
+                );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
     @ExceptionHandler(InvalidRefreshTokenException.class)
     public ResponseEntity<ErrorResponse> handleInvalidTokenException(
-            InvalidRefreshTokenException ex) {
+            InvalidRefreshTokenException ex, HttpServletRequest request) {
         ErrorResponse errorResponse =
                 new ErrorResponse(
                         LocalDateTime.now(),
@@ -91,7 +96,8 @@ public class GlobalExceptionHandler {
                         "Unauthorized",
                         "INVALID_REFRESH_TOKEN",
                         ex.getMessage(),
-                        "/api/auth/refresh");
+                        request.getRequestURI()
+                );
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
 
@@ -105,7 +111,8 @@ public class GlobalExceptionHandler {
                         "Unauthorized",
                         "INVALID_CREDENTIALS",
                         ex.getMessage(),
-                        request.getRequestURI());
+                        request.getRequestURI()
+                );
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
 
@@ -119,7 +126,8 @@ public class GlobalExceptionHandler {
                         "Unauthorized",
                         "AUTHENTICATION_REQUIRED",
                         ex.getMessage(),
-                        request.getRequestURI());
+                        request.getRequestURI()
+                );
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
 
@@ -132,7 +140,8 @@ public class GlobalExceptionHandler {
                         "Unauthorized",
                         "TOKEN ALREADY BLACKLISTED",
                         ex.getMessage(),
-                        request.getRequestURI());
+                        request.getRequestURI()
+                );
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
 
@@ -145,7 +154,22 @@ public class GlobalExceptionHandler {
                         "Unauthorized",
                         "REFRESH TOKEN REUSE DETECTED",
                         ex.getMessage(),
-                        request.getRequestURI());
+                        request.getRequestURI()
+                );
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+    }
+
+    @ExceptionHandler(UserDisabledException.class)
+    public ResponseEntity<ErrorResponse> handleUserDisabledException(UserDisabledException ex, HttpServletRequest request) {
+        ErrorResponse errorResponse =
+                new ErrorResponse(
+                        LocalDateTime.now(),
+                        403,
+                        "Forbidden",
+                        "USER_DISABLED",
+                        ex.getMessage(),
+                        request.getRequestURI()
+                );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
     }
 }

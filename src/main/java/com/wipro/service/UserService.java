@@ -29,4 +29,11 @@ public class UserService {
             throw new UserNotFoundException("User not found");
         }
     }
+
+    public String disableUserById(Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found"));
+        user.setEnabled(false);
+        User updatedUser = userRepository.save(user);
+        return "User  id: " + updatedUser.getId().toString() + " disabled successfully";
+    }
 }
