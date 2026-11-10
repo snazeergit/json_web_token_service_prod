@@ -27,7 +27,6 @@ public class RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtService jwtService;
-    private final SecurityIncidentService securityIncidentService;
 
     @Value("${jwt.refresh-token-expiry}")
     private long refreshTokenExpiry;
@@ -41,7 +40,8 @@ public class RefreshTokenService {
                 RefreshToken.builder()
                         .token(token)
                         .user(user)
-                        .expiryDate(LocalDateTime.now().plusSeconds(refreshTokenExpiry / 1000))
+                        .revoked(false)
+                        .expiryDate(LocalDateTime.now().plusDays(refreshTokenExpiry))
                         .build();
         refreshTokenRepository.save(refreshToken);
         return token;
@@ -50,7 +50,15 @@ public class RefreshTokenService {
     /**
      * Refresh Access Token
      */
-    @Transactional
+    /*
+    Below method runs in single transaction, so if any exception occurs, the transaction will be rolled back all operations.
+    refreshTokenRepository.revokeAllByUserId(user.getId()); will be rolled back if RefreshTokenReuseDetectedException occurs
+    refreshTokenRepository.delete(existingRefreshToken); will be rolled back if RefreshTokenExpiredException occurs
+    To prevent it we added these two exceptions to noRollbackFor attribute or we can also do
+    @Transactional(propagation = Propagation.REQUIRES_NEW) on revokeAllByUserId and delete methods in RefreshTokenRepository
+    however delete it built in method from CRUD Repository so we cannot add @Transactional(propagation = Propagation.REQUIRES_NEW) on it.
+     */
+    @Transactional(noRollbackFor = {RefreshTokenReuseDetectedException.class, RefreshTokenExpiredException.class})
     public AuthResponse refreshAccessToken(RefreshTokenRequest request) {
 
         // Validating input refresh token
@@ -64,12 +72,10 @@ public class RefreshTokenService {
 
         // Refresh token reuse detection
         if (existingRefreshToken.isRevoked()) {
-
             log.info("Revoking all refresh tokens for user {}", user.getUsername());
-            //updating the revoked status of all refresh tokens for the user in a new transaction
-            int revoked = securityIncidentService.revokeAllSessions(user.getId());
+            //updating the revoked status of all refresh tokens for the user
+            int revoked= refreshTokenRepository.revokeAllByUserId(user.getId());
             log.info("Revoked {} refresh tokens", revoked);
-
             throw new RefreshTokenReuseDetectedException(
                     "Refresh token reuse detected. All sessions revoked.");
         }
@@ -91,15 +97,6 @@ public class RefreshTokenService {
 
         // Generate new refresh token with revoke status false and save it to the database
         String newRefreshTokenValue = createRefreshToken(user);
-        RefreshToken newRefreshToken =
-                RefreshToken.builder()
-                        .token(newRefreshTokenValue)
-                        .user(user)
-                        .expiryDate(LocalDateTime.now().plusDays(7))
-                        .revoked(false)
-                        .build();
-
-        refreshTokenRepository.save(newRefreshToken);
 
         // Revoke old refresh token instead of deleting it
         existingRefreshToken.setRevoked(true);

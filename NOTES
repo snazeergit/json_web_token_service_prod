@@ -1,0 +1,18 @@
+Fix applied to
+RefreshTokenRepository.java
+. Here's the full picture:
+
+What was wrong — TOCTOU race condition
+
+refreshAccessToken did a check-then-act in two separate steps:
+
+findByToken() → read revoked = false
+... do work ... → mark revoked = true and commit
+With default READ_COMMITTED isolation, two concurrent requests with the same token both executed step 1 before either committed step 2. Both saw revoked = false, both passed the reuse check, then one committed first — and the second either collided or arrived a millisecond later and saw the token already revoked → 401 + all sessions wiped.
+
+What was changed
+
+// BeforeOptional<RefreshToken> findByToken(String token);// After@Lock(LockModeType.PESSIMISTIC_WRITE)Optional<RefreshToken> findByToken(String token);
+PESSIMISTIC_WRITE translates to SELECT ... FOR UPDATE at the DB level. The first transaction to reach a given token row acquires an exclusive row lock. The second request blocks at the findByToken call until the first commits and releases the lock. At that point the second reads revoked = true and correctly triggers reuse detection — but now it's a deterministic, expected result rather than a nondeterministic crash.
+
+Next step: Restart the server to pick up the change, do a fresh login to get a clean token pair, then rapid-fire the Refresh endpoint — you should now always get a clean 401 (reuse detected) on the second fast request instead of a session wipe race.
