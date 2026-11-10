@@ -1,5 +1,6 @@
 package com.wipro.security;
 
+import com.wipro.repository.BlacklistedTokenRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,11 +21,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final CustomUserDetailsService userDetailsService;
+    private final BlacklistedTokenRepository blacklistedTokenRepository;
 
     @Override
-    protected void doFilterInternal(
-            HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
 
@@ -37,26 +37,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String jwt = authHeader.substring(7);
             String username = jwtService.extractUsername(jwt);
 
+            if (blacklistedTokenRepository.existsByToken(jwt)) {
+                SecurityContextHolder.clearContext();
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Access token has been revoked");
+                return;
+            }
+
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
                 if (jwtService.isTokenValid(jwt, userDetails)) {
-                    UsernamePasswordAuthenticationToken auth =
-                            new UsernamePasswordAuthenticationToken(
-                                    userDetails, null, userDetails.getAuthorities());
+                    UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
                     auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
             }
         } catch (io.jsonwebtoken.ExpiredJwtException ex) {
             request.setAttribute("jwt_error", "ACCESS_TOKEN_EXPIRED");
             throw ex;
-        } catch (io.jsonwebtoken.MalformedJwtException
-                 | io.jsonwebtoken.security.SignatureException
-                 | IllegalArgumentException ex) {
+        } catch (io.jsonwebtoken.MalformedJwtException | io.jsonwebtoken.security.SignatureException |
+                 IllegalArgumentException ex) {
             request.setAttribute("jwt_error", "INVALID_ACCESS_TOKEN");
             throw ex;
         }
+
         filterChain.doFilter(request, response);
     }
 }
